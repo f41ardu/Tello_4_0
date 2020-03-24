@@ -51,23 +51,48 @@ class Telegram():
         self.data = []
         self.sequence_number = 1
 
+    def connect(self):
+        tt = b'conn_req:xx'
+        packet = bytearray(tt)
+        # Bytearray allows modification
+        packet[len(packet)-2] = 0x96
+        packet[len(packet)-1] = 0x17
+        return packet, packet.hex()
+    
+    def takeoff(self):
+        self.sequence_number = self.sequence_number + 1 
+        packet = self.build(104, 84, self.sequence_number)
+        return packet, packet.hex()
+    
+    def land(self):
+        self.sequence_number = self.sequence_number + 1
+        packet = self.build(104, 85, self.sequence_number, [0,])
+        return packet, packet.hex()
+    
     def stick(self, fast, roll, pitch, thr, yaw):
+        # build data from stick input 
         self._setStickData(fast, roll, pitch, thr, yaw)
+        # build and return package
         return self.build(104, 85, self.sequence_number, self.data)
         
-
     def build(self,packet_type_id, command_id, sequence_number, data=[]):
+        # build the package
+        # int to bytes 
         data = bytes(data)
+        # all the magic here, I guess more or less self explaining 
         packet_type_id = packet_type_id.to_bytes(1, 'little')
         packet_size = (len(data) * 8 + self.head * 8).to_bytes(2, 'little')
         crc8 = self._calcCRC8(self.start + packet_size, len(self.start + packet_size)).to_bytes(1, 'little')
         command_id = command_id.to_bytes(2, 'little')
         sequence_number = sequence_number.to_bytes(2, 'little')
+        # concatenate 
         command = self.start + packet_size + crc8 + packet_type_id + command_id + sequence_number + data
         cLen = len(command)
         crc16 = self._calcCRC16(command, cLen).to_bytes(2, 'little')
+        # concatenate
         command = self.start + packet_size + crc8 + packet_type_id + command_id + sequence_number + data + crc16
-        return command, command.hex()
+        # return package
+        return command
 
     def _setStickData(self,fast, roll, pitch, thr, yaw):
         now = datetime.datetime.now()
@@ -81,7 +106,7 @@ class Telegram():
 
 
 
-# from Pingosoft TelloLib
+# proprieatry crc's from Pingosoft TelloLib. Thank you!!!! 
     def _calcCRC16(self, buf, size):
         i = 0
         seed = 0x3692

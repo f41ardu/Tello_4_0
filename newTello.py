@@ -18,22 +18,11 @@ myTello = myUDP()
 # telegram object
 telegram = Telegram()
 
-#sequenze
-sequence = 1
-#response from tello
-get = ""
-#start sequence
-tt = b'conn_req:xx'
-packet = bytearray(tt)
-#packet.extend(map(ord, tt))
-print("tt :",packet)
 
-# Bytearray allows modification
-packet[len(packet)-2] = 0x96
-packet[len(packet)-1] = 0x17
+print(telegram.connect()) 
 
-stick = telegram.stick(299,300,500,500,3)
-print(stick)
+telegramData = telegram.stick(299,300,500,500,3)
+#print(stick)
 
 if __name__ == '__main__':
 
@@ -51,21 +40,12 @@ if __name__ == '__main__':
 #        print(bb.decode("latin-1",errors="ignore"))
 
 # take off
-    sequence = 1
-    #packet_type_id, command_id, sequence, data=[]
-    packet, _ = telegram.build(104, 84, sequence)
-    print("Takeoff ", packet.hex())
-    get = myTello.udp_send(packet,tellohost,telloport)
-    time.sleep(10)
+    telegramData, telegramDatahex = telegram.takeoff()
+    print("takekoff:",telegramData)
+    get = myTello.udp_send(telegramData,tellohost,telloport)
+    time.sleep(1)
 # land
-    sequence = sequence + 1
-    packet, _ = telegram.build(104, 85, sequence,[0,])
-    print("Land ", packet.hex())
-    get = myTello.udp_send(packet,tellohost,telloport)
+    telegramData, telegramDatahex = telegram.land()
+    print("Land ", telegramData)
+    get = myTello.udp_send(telegramData,tellohost,telloport)
     
-#stick
-    # land
-    sequence = sequence + 1
-    #packet, _ = telegram.build(104, 85, sequence, stick)
-    #print("Land ", packet.hex())
-    #get = myTello.udp_send(packet,tellohost,telloport)
