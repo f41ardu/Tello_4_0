@@ -48,17 +48,13 @@ class Telegram():
     def __init__(self):
         self.start=b'\xcc'
         self.head = 11
+        self.data = []
+        self.sequence_number = 1
 
-    def setStickData(self, fast, roll, pitch, thr, yaw):
-        data = []
-        now = datetime.datetime.now()
-        stickData = (fast << 44) | (yaw << 33) | (thr << 22) | (pitch << 11) | (roll)
-        data = [ 0xff & stickData, stickData >> 8 & 0xff,
-                 stickData >> 16 & 0xff, stickData >> 24 & 0xff,
-                 stickData >> 32 & 0xff, stickData >> 40 & 0xff,
-                 now.hour, now.minute, now.second,
-                 now.microsecond & 0xff, now.microsecond >> 16] 
-        return data
+    def stick(self, fast, roll, pitch, thr, yaw):
+        self._setStickData(fast, roll, pitch, thr, yaw)
+        return self.build(104, 85, self.sequence_number, self.data)
+        
 
     def build(self,packet_type_id, command_id, sequence_number, data=[]):
         data = bytes(data)
@@ -72,6 +68,18 @@ class Telegram():
         crc16 = self._calcCRC16(command, cLen).to_bytes(2, 'little')
         command = self.start + packet_size + crc8 + packet_type_id + command_id + sequence_number + data + crc16
         return command, command.hex()
+
+    def _setStickData(self,fast, roll, pitch, thr, yaw):
+        now = datetime.datetime.now()
+        stickData = (fast << 44) | (yaw << 33) | (thr << 22) | (pitch << 11) | (roll)
+        self.data = [ 0xff & stickData, stickData >> 8 & 0xff,
+                 stickData >> 16 & 0xff, stickData >> 24 & 0xff,
+                 stickData >> 32 & 0xff, stickData >> 40 & 0xff,
+                 now.hour, now.minute, now.second,
+                 now.microsecond & 0xff, now.microsecond >> 16] 
+        return
+
+
 
 # from Pingosoft TelloLib
     def _calcCRC16(self, buf, size):
