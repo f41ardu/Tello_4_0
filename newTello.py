@@ -32,9 +32,8 @@ print("tt :",packet)
 packet[len(packet)-2] = 0x96
 packet[len(packet)-1] = 0x17
 
-stick = telegram.setStickData(299,300,500,500,3)
+stick = telegram.stick(299,300,500,500,3)
 print(stick)
-print(bytes(stick))
 
 if __name__ == '__main__':
 
@@ -67,6 +66,6 @@ if __name__ == '__main__':
 #stick
     # land
     sequence = sequence + 1
-    packet, _ = telegram.build(104, 85, sequence, stick)
-    print("Land ", packet.hex())
-    get = myTello.udp_send(packet,tellohost,telloport)
+    #packet, _ = telegram.build(104, 85, sequence, stick)
+    #print("Land ", packet.hex())
+    #get = myTello.udp_send(packet,tellohost,telloport)
