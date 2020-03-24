@@ -70,6 +70,7 @@ class Telegram():
         return packet, packet.hex()
     
     def stick(self, fast, roll, pitch, thr, yaw):
+        self.sequence_number = self.sequence_number + 1
         # build data from stick input 
         self._setStickData(fast, roll, pitch, thr, yaw)
         # build and return package
