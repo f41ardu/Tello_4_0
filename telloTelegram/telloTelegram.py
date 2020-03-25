@@ -107,6 +107,12 @@ class Telegram():
         self.sequence_number = 0
         return
 
+    def _map(x, in_min, in_max, out_min,  out_max):
+        '''
+        map value x in range in_min to in_max to out_min to out_max
+        
+        '''
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 
 
 # proprieatry crc's from Pingosoft TelloLib. Thank you!!!! 
