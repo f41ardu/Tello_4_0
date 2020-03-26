@@ -116,7 +116,7 @@ class Telegram():
     def _map(self ,x, in_min, in_max, out_min,  out_max):
         '''
         map value x in range in_min to in_max to out_min to out_max
-        and restrit from MIN to MAX
+        and restrict from MIN to MAX
         '''
         RC_VAL_MIN     = 364
         RC_VAL_MAX     = 1684
