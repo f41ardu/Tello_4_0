@@ -4,6 +4,21 @@
 # (c) 02/2020 f41ardu 
 #
 # MIT Lisence
+'''
+https://www.heise.de/forum/heise-online/News-Kommentare/Nutzerandrang-Dienste-von-Microsoft-365-werden-eingeschraenkt/Eine-Cloud-sie-zu-knechten/posting-36372321/show/
+
+Eine Cloud sie zu knechten
+Drei Wolken als ClickDummy und ab in das Licht,
+Sieben dem Marketing mit ihren Hirnen voll Koks,
+Den Sterblichen, ewig dem Fenster verfallen, neun,
+
+Eine dem lustigen Onkel auf seinem Thron,
+Im Lande CloudAlle, wo die Einschränkungen drohn.
+Eine Wolke, sie zu knechten, sie alle zu finden,
+Ins Kuckucksheim zu treiben und ewig zu binden
+
+Im Lande CloudAlle, wo die Dummheit erhält ihren Lohn.
+'''
 
 import pygame
 import time
@@ -21,19 +36,21 @@ button = [0,0,0,0,0,]
 axisTello = [0,0,0,0,0,0,0,0,0,]
 
 # tello adress 
-#tellohost = '192.168.10.1'
+tellohost = '192.168.10.1'
 
 # use for test/ require repeater.js 
-tellohost = 'localhost'
+#tellohost = 'localhost'
 
 # telloport
 telloport = 8889
 
-# RC control variables 
-a = 0
-b = 0
-c = 0
-d = 0
+# RC control variables
+RC_VAL_MID = 1024
+fast       = 0 # not used 
+thr        = RC_VAL_MID
+yaw        = RC_VAL_MID
+pitch      = RC_VAL_MID
+roll       = RC_VAL_MID 
 
 # Connection state
 Connected = False
@@ -69,28 +86,30 @@ myTello = myUDP()
 # telegram handle
 telegram = Telegram()
 
-# connect 
-telegramData, telegramDatahex = telegram.connect()
-print("Connect ", telegramData)
-get = myTello.udp_send(telegramData,tellohost,telloport)   
 
 print ('\r\n\r\nTello r/c Control.\r\n')
 
-# Establish connection ( is Tello available
-#while (not Connected):
-#    Connected = ping.ping(tellohost,1,1)
-#    print('Connected: ', Connected)
-
-# when Tello is available set Tello into command mode
-#Connected = False
-#while (not Connected):
-#    get = u.udp_send('command',tellohost,telloport) 
-#    if get == 'ok':
-#        Connected = True
-#        print('Tello in Command mode: ', Connected)
 # launch pygame panel 
 pygame.init()
- 
+# connect 
+telegramData, telegramDatahex = telegram.connect()
+print("Connect ", telegramData)
+get = myTello.udp_send(telegramData,tellohost,telloport)
+# connect to tello
+while isinstance(get, str):
+    get = myTello.udp_send(telegramData,tellohost,telloport)
+    print(len(get))
+    print("AAAA:",get)
+    time.sleep(0.5)
+
+# wait until we get conn_rec
+#while isinstance(get, bytes):
+#    bb = myTello.udp_get()
+#    print(type(bb))
+#    print(bb.decode("latin-1",errors="ignore"))
+
+
+
 # Set the width and height of the screen [width,height]
 size = [500,500]
 screen = pygame.display.set_mode(size)
@@ -155,14 +174,14 @@ while done==False:
             axisTello[i] = int(1600*joystick.get_axis( i ))
             textPrint.print(screen, "Axis {} value: {:>6.0f}".format(i, axisTello[i]) )
         textPrint.unindent()
-        fast    = 0
+        fast    = 0 # not used
         thr     =  axisTello[0] # move left / right
         yaw     = -axisTello[2] # move forward / backward
         pitch   = -axisTello[1] # move up / down
         roll    =  axisTello[4] # turn left/right
         
         # if Airborne send channels 
-        if True:
+        if inAir:
             #stick(self, 0, roll, pitch, thr, yaw)
             telegramData, telegramDatahex = telegram.stick(0, roll, pitch, thr, yaw)
             myTello.udp_send(telegramData,tellohost,telloport)
