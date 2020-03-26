@@ -187,7 +187,7 @@ while done==False:
    # Get the name from the OS for the controller/joystick
         name = joystick.get_name()
         textPrint.print(screen, "Joystick name: {}".format(name) )
-        ,
+        
         # Usually axis run in pairs, up/down for one, and left/right for
         # the other.
         axes = joystick.get_numaxes()
