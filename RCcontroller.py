@@ -147,7 +147,9 @@ while done==False:
     textPrint.print(screen, "Number of joysticks: {}".format(joystick_count) )
     # print("Number of joysticks: {}".format(joystick_count) )
     textPrint.indent()
-   
+    
+    print(myTello.udp_get())
+    
     # For each joystick:
     for i in range(joystick_count):
         joystick = pygame.joystick.Joystick(i)
