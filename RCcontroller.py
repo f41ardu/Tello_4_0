@@ -112,8 +112,6 @@ textPrint = TextPrint()
 # -------- Main Program Loop -----------
 while done==False:
     
-    
-    
     # EVENT PROCESSING STEP
     for event in pygame.event.get(): # User did something
         if event.type == pygame.QUIT: # If user clicked close
@@ -149,35 +147,40 @@ while done==False:
         axes = joystick.get_numaxes()
         textPrint.print(screen, "Number of axes: {}".format(axes) )
         textPrint.indent()
-        # the magic number 160 is controller dependend, check your controller 
+        
+        # get axis and assign to controll channels
+        # assignmemt and magic number 1600 is controller dependend, check your controller
+        # input range for .stick is from -1000 to 1000 
         for i in range( axes ):
-            axisTello[i] = int(160*joystick.get_axis( i ))
+            axisTello[i] = int(1600*joystick.get_axis( i ))
             textPrint.print(screen, "Axis {} value: {:>6.0f}".format(i, axisTello[i]) )
-        # a,b,c,d depends from your controller / check stick assignemt before 
         textPrint.unindent()
-        a = axisTello[0]
-        b = -axisTello[2]
-        c = -axisTello[1]
-        d = axisTello[4]
-        msg = "rc " + str(a) + " " + str(b) + " " + str(c) + " " + str(d)
-        if inAir and math.sqrt(a*a+b*b+c*c+d*d) > 5:
-            telegramData, telegramDatahex = telegram.stick(fast, roll, pitch, thr, yaw)
+        fast    = 0
+        thr     =  axisTello[0] # move left / right
+        yaw     = -axisTello[2] # move forward / backward
+        pitch   = -axisTello[1] # move up / down
+        roll    =  axisTello[4] # turn left/right
+        
+        # if Airborne send channels 
+        if True:
+            #stick(self, 0, roll, pitch, thr, yaw)
+            telegramData, telegramDatahex = telegram.stick(0, roll, pitch, thr, yaw)
             myTello.udp_send(telegramData,tellohost,telloport)
         
-        # axis2 = forward/backward  b
-        # axis2 = left / reight a
-        # axis1 = up/down d
-        #axis4 = yaw c
-        # buttons depend from your controller / check buttons first
+        # read controller buttons 
+        # buttons is controller specific / check your buttons befor your first fligth
+        # assignment is like sticks depending from controller used, check before first flight
         buttons = joystick.get_numbuttons()
         textPrint.print(screen, "Number of buttons: {}".format(buttons) )
         textPrint.indent()
  
+        # read all buttons avalabel 
         for i in range( buttons ):
             button[i] = joystick.get_button( i )
             textPrint.print(screen, "Button {:>2} value: {}".format(i,button[i]) )
             reading = button[0]
-        # take off    
+            
+        # Tello take off    
         if button[0] == 1 and inAir == False:
             # take off
             telegramData, telegramDatahex = telegram.takeoff()
@@ -185,7 +188,8 @@ while done==False:
             get = myTello.udp_send(telegramData,tellohost,telloport)
             time.sleep(0.05)
             inAir = True
-        # landing       
+            
+        # Tell land       
         if button[0] == 0 and inAir == True:
             telegramData, telegramDatahex = telegram.land()
             print("Land ", telegramData)
@@ -193,7 +197,7 @@ while done==False:
             inAir=False
     
         textPrint.unindent()
-        textPrint.unindent()
+#        textPrint.unindent()
         
     # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
    
@@ -209,8 +213,8 @@ while done==False:
 # on exit if running from IDLE.
 
 pygame.quit ()
+myTello.close()
 print ('quit ...')
-myTello.close() 
 
 
  
