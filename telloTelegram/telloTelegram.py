@@ -70,12 +70,17 @@ class Telegram():
         return packet, packet.hex()
     
     def stick(self, fast, roll, pitch, thr, yaw):
-    
         self.sequence_number = self.sequence_number + 1
+        fast  = self._map(fast, -1000, 1000, 364, 1684)
+        roll  = self._map(roll, -1000, 1000, 364, 1684)
+        pitch = self._map(pitch, -1000, 1000, 364, 1684)
+        thr   = self._map(thr, -1000, 1000, 364, 1684)
+        yaw   = self._map(yaw, -1000, 1000, 364, 1684)
+        print(fast,roll,pitch,thr,yaw)
         # build data from stick input 
         self._setStickData(fast, roll, pitch, thr, yaw)
         # build and return package
-        return self.build(96, 80, self.sequence_number, self.data)
+        return self.build(96, 80, self.sequence_number, self.data), self.build(96, 80, self.sequence_number, self.data).hex()
         
     def build(self,packet_type_id, command_id, sequence_number, data=[]):
         # build the package
@@ -107,13 +112,19 @@ class Telegram():
         self.sequence_number = 0
         return
 
-    def _map(x, in_min, in_max, out_min,  out_max):
+    def _map(self ,x, in_min, in_max, out_min,  out_max):
         '''
         map value x in range in_min to in_max to out_min to out_max
-        
+        and restrit from MIN to MAX
         '''
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-
+        RC_VAL_MIN     = 364
+        RC_VAL_MAX     = 1684
+        map = int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
+        if map < RC_VAL_MIN:
+            map = 364
+        if map >=1648:
+            map = 1648
+        return map
 
 # proprieatry crc's from Pingosoft TelloLib. Thank you!!!! 
     def _calcCRC16(self, buf, size):
