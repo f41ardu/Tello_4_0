@@ -80,7 +80,8 @@ class Telegram():
         # build data from stick input 
         self._setStickData(fast, roll, pitch, thr, yaw)
         # build and return package
-        return self.build(96, 80, self.sequence_number, self.data), self.build(96, 80, self.sequence_number, self.data).hex()
+        packet = self.build(96, 80, self.sequence_number, self.data)
+        return packet, packet.hex()
         
     def build(self,packet_type_id, command_id, sequence_number, data=[]):
         # build the package
