@@ -102,12 +102,11 @@ while isinstance(get, str):
     print("AAAA:",get)
     time.sleep(0.5)
 
-# wait until we get conn_rec
-#while isinstance(get, bytes):
-#    bb = myTello.udp_get()
-#    print(type(bb))
-#    print(bb.decode("latin-1",errors="ignore"))
-
+bb = myTello.udp_get()
+print(type(bb))
+conn = bb.decode("latin-1",errors="ignore")
+if not 'conn_ack' in conn: 
+    conn = bb.decode("latin-1",errors="ignore")
 
 
 # Set the width and height of the screen [width,height]
@@ -157,35 +156,6 @@ while done==False:
         textPrint.print(screen, "Joystick {}".format(i) )
         textPrint.indent()
    
-        # Get the name from the OS for the controller/joystick
-        name = joystick.get_name()
-        textPrint.print(screen, "Joystick name: {}".format(name) )
-       
-        # Usually axis run in pairs, up/down for one, and left/right for
-        # the other.
-        axes = joystick.get_numaxes()
-        textPrint.print(screen, "Number of axes: {}".format(axes) )
-        textPrint.indent()
-        
-        # get axis and assign to controll channels
-        # assignmemt and magic number 1600 is controller dependend, check your controller
-        # input range for .stick is from -1000 to 1000 
-        for i in range( axes ):
-            axisTello[i] = int(1600*joystick.get_axis( i ))
-            textPrint.print(screen, "Axis {} value: {:>6.0f}".format(i, axisTello[i]) )
-        textPrint.unindent()
-        fast    = 0 # not used
-        thr     =  axisTello[0] # move left / right
-        yaw     = -axisTello[2] # move forward / backward
-        pitch   = -axisTello[1] # move up / down
-        roll    =  axisTello[4] # turn left/right
-        
-        # if Airborne send channels 
-        if inAir:
-            #stick(self, 0, roll, pitch, thr, yaw)
-            telegramData, telegramDatahex = telegram.stick(0, roll, pitch, thr, yaw)
-            myTello.udp_send(telegramData,tellohost,telloport)
-        
         # read controller buttons 
         # buttons is controller specific / check your buttons befor your first fligth
         # assignment is like sticks depending from controller used, check before first flight
@@ -214,7 +184,36 @@ while done==False:
             print("Land ", telegramData)
             get = myTello.udp_send(telegramData,tellohost,telloport)           
             inAir=False
-    
+   # Get the name from the OS for the controller/joystick
+        name = joystick.get_name()
+        textPrint.print(screen, "Joystick name: {}".format(name) )
+        ,
+        # Usually axis run in pairs, up/down for one, and left/right for
+        # the other.
+        axes = joystick.get_numaxes()
+        textPrint.print(screen, "Number of axes: {}".format(axes) )
+        textPrint.indent()
+        
+        # get axis and assign to controll channels
+        # assignmemt and magic number 1600 is controller dependend, check your controller
+        #
+        # input range for .stick is from -1000 to 1000 
+        for i in range( axes ):
+            axisTello[i] = int(1600*joystick.get_axis( i ))
+            textPrint.print(screen, "Axis {} value: {:>6.0f}".format(i, axisTello[i]) )
+        textPrint.unindent()
+        fast  = 0 # not used
+        pitch = -axisTello[2] # move left / right
+        roll  =  axisTello[0] # move forward / backward
+        thr   = -axisTello[1] # move up / down
+        yaw   =  axisTello[4] # turn left/right
+        
+        # if Airborne send channels 
+        if inAir:
+            #                                       .stick(fast, roll, pitch, thr, yaw)
+            telegramData, telegramDatahex = telegram.stick(fast, roll, pitch, thr, yaw)
+            myTello.udp_send(telegramData,tellohost,telloport)
+                     
         textPrint.unindent()
 #        textPrint.unindent()
         

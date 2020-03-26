@@ -76,7 +76,7 @@ class Telegram():
         pitch = self._map(pitch, -1000, 1000, 364, 1684)
         thr   = self._map(thr, -1000, 1000, 364, 1684)
         yaw   = self._map(yaw, -1000, 1000, 364, 1684)
-        print(fast,roll,pitch,thr,yaw)
+        # print(fast,roll,pitch,thr,yaw)
         # build data from stick input 
         self._setStickData(fast, roll, pitch, thr, yaw)
         # build and return package
