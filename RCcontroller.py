@@ -79,13 +79,10 @@ class TextPrint:
     def unindent(self):
         self.x -= 10
         
-# ping handle 
-#ping = Ping(tellohost,1,2) # Ping(tellohost,1,2)
 # udp handle 
 myTello = myUDP()
 # telegram handle
 telegram = Telegram()
-
 
 print ('\r\n\r\nTello r/c Control.\r\n')
 
@@ -107,7 +104,8 @@ print(type(bb))
 conn = bb.decode("latin-1",errors="ignore")
 if not 'conn_ack' in conn: 
     conn = bb.decode("latin-1",errors="ignore")
-
+else:
+    conntected = True
 
 # Set the width and height of the screen [width,height]
 size = [500,500]
@@ -147,7 +145,9 @@ while done==False:
     textPrint.print(screen, "Number of joysticks: {}".format(joystick_count) )
     # print("Number of joysticks: {}".format(joystick_count) )
     textPrint.indent()
-   
+    
+    print(myTello.udp_get())
+    
     # For each joystick:
     for i in range(joystick_count):
         joystick = pygame.joystick.Joystick(i)
@@ -178,12 +178,14 @@ while done==False:
             time.sleep(0.05)
             inAir = True
             
-        # Tell land       
+        # Tello land       
         if button[0] == 0 and inAir == True:
             telegramData, telegramDatahex = telegram.land()
             print("Land ", telegramData)
-            get = myTello.udp_send(telegramData,tellohost,telloport)           
+            get = myTello.udp_send(telegramData,tellohost,telloport)
+            time.sleep(0.05)
             inAir=False
+            
    # Get the name from the OS for the controller/joystick
         name = joystick.get_name()
         textPrint.print(screen, "Joystick name: {}".format(name) )

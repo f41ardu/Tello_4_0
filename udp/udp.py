@@ -95,10 +95,10 @@ class myUDP(object):
         Returns:
             Response data from target
         """
-        print (data, targetAddr, targetPort)
+        #print (data, targetAddr, targetPort)
         #sent=self.sock.sendto(data.encode(encoding="utf-8"),(targetAddr, targetPort))
         sent=self.sock.sendto(data,(targetAddr, targetPort))
-        print (sent)
+        #print (sent)
         #print("A:",self.data_rec)
         return self.received
      
