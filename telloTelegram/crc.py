@@ -42,20 +42,20 @@ TBL_CRC8 = [
 ]
     
 # proprieatry crc's from Pingosoft TelloLib. Thank you!!!! 
-def calcCRC16(self, buf, size):
+def calcCRC16(buf, size):
     i = 0
     seed = 0x3692
     while size > 0:
-        seed = self.TBL_CRC16[(seed ^ buf[i]) & 0xff] ^ (seed >> 8)
+        seed = TBL_CRC16[(seed ^ buf[i]) & 0xff] ^ (seed >> 8)
         i = i + 1
         size = size - 1
     return seed
 
-def calcCRC8(self, buf, size):
+def calcCRC8(buf, size):
     i = 0
     seed = 0x77
     while size > 0:
-        seed = self.TBL_CRC8[(seed ^ buf[i]) & 0xff]
+        seed = TBL_CRC8[(seed ^ buf[i]) & 0xff]
         i = i + 1
         size = size - 1
     return seed
