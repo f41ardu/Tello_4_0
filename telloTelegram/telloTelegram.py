@@ -3,7 +3,7 @@
 document me
 """
 import datetime
-from . crc import *
+from . import crc
 
 class Telegram():
    
@@ -19,6 +19,7 @@ class Telegram():
         # Bytearray allows modification
         packet[len(packet)-2] = 0x96
         packet[len(packet)-1] = 0x17
+        crc8 = crc.calcCRC8(packet, len(packet)).to_bytes(1, 'little')
         return packet, packet.hex()
     
     def takeoff(self):
@@ -89,3 +90,5 @@ class Telegram():
             map = 1648
         return map
 
+if __name__ == '__main__':
+    print('Later you can use telloTest.py not implemented yet (for testing.)')
