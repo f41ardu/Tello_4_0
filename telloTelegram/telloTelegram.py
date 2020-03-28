@@ -3,7 +3,7 @@
 document me
 """
 import datetime
-from . import crc
+from . crc import *
 
 class Telegram():
    
