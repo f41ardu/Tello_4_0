@@ -23,9 +23,12 @@ Im Lande CloudAlle, wo die Dummheit erhält ihren Lohn.
 import pygame
 import time
 import math
+
 from udp.udp import myUDP
 from telloTelegram.telloTelegram import Telegram
+from telloTelegram.telloFlightData import FlightData
  
+
 # Define some colors
 darkgrey = (40, 40, 40)
 lightgrey = (150, 150, 150)
@@ -51,6 +54,56 @@ thr        = RC_VAL_MID
 yaw        = RC_VAL_MID
 pitch      = RC_VAL_MID
 roll       = RC_VAL_MID 
+
+# low-level Protocol (https://tellopilots.com/wiki/protocol/#MessageIDs)
+START_OF_PACKET                     = 0xcc
+SSID_MSG                            = 0x0011
+SSID_CMD                            = 0x0012
+SSID_PASSWORD_MSG                   = 0x0013
+SSID_PASSWORD_CMD                   = 0x0014
+WIFI_REGION_MSG                     = 0x0015
+WIFI_REGION_CMD                     = 0x0016
+WIFI_MSG                            = 0x001a
+VIDEO_ENCODER_RATE_CMD              = 0x0020
+VIDEO_DYN_ADJ_RATE_CMD              = 0x0021
+EIS_CMD                             = 0x0024
+VIDEO_START_CMD                     = 0x0025
+VIDEO_RATE_QUERY                    = 0x0028
+TAKE_PICTURE_COMMAND                = 0x0030
+VIDEO_MODE_CMD                      = 0x0031
+VIDEO_RECORD_CMD                    = 0x0032
+EXPOSURE_CMD                        = 0x0034
+LIGHT_MSG                           = 0x0035
+JPEG_QUALITY_MSG                    = 0x0037
+ERROR_1_MSG                         = 0x0043
+ERROR_2_MSG                         = 0x0044
+VERSION_MSG                         = 0x0045
+TIME_CMD                            = 0x0046
+ACTIVATION_TIME_MSG                 = 0x0047
+LOADER_VERSION_MSG                  = 0x0049
+STICK_CMD                           = 0x0050
+TAKEOFF_CMD                         = 0x0054
+LAND_CMD                            = 0x0055
+FLIGHT_MSG                          = 0x0056
+SET_ALT_LIMIT_CMD                   = 0x0058
+FLIP_CMD                            = 0x005c
+THROW_AND_GO_CMD                    = 0x005d
+PALM_LAND_CMD                       = 0x005e
+TELLO_CMD_FILE_SIZE                 = 0x0062  # pt50
+TELLO_CMD_FILE_DATA                 = 0x0063  # pt50
+TELLO_CMD_FILE_COMPLETE             = 0x0064  # pt48
+SMART_VIDEO_CMD                     = 0x0080
+SMART_VIDEO_STATUS_MSG              = 0x0081
+LOG_HEADER_MSG                      = 0x1050
+LOG_DATA_MSG                        = 0x1051
+LOG_CONFIG_MSG                      = 0x1052
+BOUNCE_CMD                          = 0x1053
+CALIBRATE_CMD                       = 0x1054
+LOW_BAT_THRESHOLD_CMD               = 0x1055
+ALT_LIMIT_MSG                       = 0x1056
+LOW_BAT_THRESHOLD_MSG               = 0x1057
+ATT_LIMIT_CMD                       = 0x1058 # Stated incorrectly by Wiki (checked from raw packets)
+ATT_LIMIT_MSG                       = 0x1059
 
 # Connection state
 Connected = False
@@ -79,12 +132,24 @@ class TextPrint:
     def unindent(self):
         self.x -= 10
         
+def byte_to_hexstring(buf):
+    if isinstance(buf, str):
+        return ''.join(["%02x " % ord(x) for x in buf]).strip()
+
+    return ''.join(["%02x " % ord(chr(x)) for x in buf]).strip() 
+ 
 # udp handle 
 myTello = myUDP()
-# telegram handle
+# telegram object
 telegram = Telegram()
+# flightdata object
+flightdata = FlightData()
 
 print ('\r\n\r\nTello r/c Control.\r\n')
+tt = b'\xcc\x18\x01\xb9\x88V\x00c\x05\x00\x00\x01\x00\xff\xff\x00\x00\xaf\x03\x00\x00Q\x00\x000\x0f\x00\x06\x00\x00\x00\x00\x00\xef\xcc'
+flight_data = flightdata.getData(tt[9:])
+print(flight_data)
+
 
 # launch pygame panel 
 pygame.init()
@@ -106,6 +171,12 @@ if not 'conn_ack' in conn:
     conn = bb.decode("latin-1",errors="ignore")
 else:
     conntected = True
+
+getBack=myTello.udp_get()
+cmd = int.from_bytes(getBack[5:6], "little")
+if cmd == WIFI_MSG:
+    print('Recived WIFI Message: ',getBack)
+
 
 # Set the width and height of the screen [width,height]
 size = [500,500]
@@ -146,7 +217,19 @@ while done==False:
     # print("Number of joysticks: {}".format(joystick_count) )
     textPrint.indent()
     
-    print(myTello.udp_get())
+    getBack=myTello.udp_get()
+    cmd = int.from_bytes(getBack[5:6], "little")
+    #cmd = (getBack[5] & 0xff) | ((getBack[6] & 0xff) << 8)
+    if cmd == WIFI_MSG:
+        print('Recived WIFI Message: ',getBack)
+        print("recv: wifi: %s" % byte_to_hexstring(getBack[9:]))
+    elif cmd == LOW_BAT_THRESHOLD_MSG:
+        print("recv: low battery threshold: %s" % byte_to_hexstring(getBack[9:-2]))
+    elif cmd == FLIGHT_MSG:
+            flight_data = flightdata.getData(getBack[9:])
+            print(flight_data)
+
+        
     
     # For each joystick:
     for i in range(joystick_count):
