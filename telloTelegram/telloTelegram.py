@@ -3,22 +3,23 @@
 document me
 """
 import datetime
-from . import crc
+from . import crc # fix required should be own class 
 
 class Telegram():
-   
+    
     def __init__(self):
         self.start=b'\xcc'
         self.head = 11
         self.data = []
         self.sequence_number = 1
-
+       
     def connect(self):
         tt = b'conn_req:xx'
         packet = bytearray(tt)
         # Bytearray allows modification
         packet[len(packet)-2] = 0x96
         packet[len(packet)-1] = 0x17
+        crc8 = crc.calcCRC8(packet, len(packet)).to_bytes(1, 'little')
         return packet, packet.hex()
     
     def takeoff(self):
@@ -88,4 +89,6 @@ class Telegram():
         if map >=1648:
             map = 1648
         return map
-
+    
+if __name__ == '__main__':
+    print('Later you can use telloTest.py not implemented yet (for testing.)')
