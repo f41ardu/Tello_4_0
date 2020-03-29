@@ -3,16 +3,16 @@
 document me
 """
 import datetime
-from . import crc
+from . import crc # fix required should be own class 
 
 class Telegram():
-   
+    
     def __init__(self):
         self.start=b'\xcc'
         self.head = 11
         self.data = []
         self.sequence_number = 1
-
+       
     def connect(self):
         tt = b'conn_req:xx'
         packet = bytearray(tt)
@@ -89,6 +89,6 @@ class Telegram():
         if map >=1648:
             map = 1648
         return map
-
+    
 if __name__ == '__main__':
     print('Later you can use telloTest.py not implemented yet (for testing.)')
