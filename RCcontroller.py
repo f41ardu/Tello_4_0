@@ -220,16 +220,23 @@ while done==False:
     getBack=myTello.udp_get()
     cmd = int.from_bytes(getBack[5:6], "little")
     #cmd = (getBack[5] & 0xff) | ((getBack[6] & 0xff) << 8)
-    if cmd == WIFI_MSG:
-        print('Recived WIFI Message: ',getBack)
-        print("recv: wifi: %s" % byte_to_hexstring(getBack[9:]))
-    elif cmd == LOW_BAT_THRESHOLD_MSG:
-        print("recv: low battery threshold: %s" % byte_to_hexstring(getBack[9:-2]))
-    elif cmd == FLIGHT_MSG:
-            flight_data = flightdata.getData(getBack[9:])
-            print(flight_data)
-
-        
+    #if cmd == WIFI_MSG:
+    #    print('Recived WIFI Message: ',getBack)
+    #    print("recv: wifi: %s" % byte_to_hexstring(getBack[9:]))
+    #if cmd == LOW_BAT_THRESHOLD_MSG:
+    #    print("recv: low battery threshold: %s" % byte_to_hexstring(getBack[9:-2]))
+    #if cmd == FLIGHT_MSG:
+    #    flight_data = flightdata.getData(getBack[9:])
+    #    print(flight_data)
+    if cmd == LOG_HEADER_MSG:
+        flight_data = flightdata.getData(getBack[9:])
+        print("log_header:",flight_data)
+    if cmd == LOG_DATA_MSG:
+        flight_data = flightdata.getData(getBack[9:])
+        print("log_data:",flight_data)   
+    if cmd == LOG_CONFIG_MSG:
+        flight_data = flightdata.getData(getBack[9:])
+        print("log_config:",flight_data)   
     
     # For each joystick:
     for i in range(joystick_count):
@@ -316,7 +323,7 @@ while done==False:
 # on exit if running from IDLE.
 
 pygame.quit ()
-myTello.close()
+myTello.udp_close()
 print ('quit ...')
 
 
