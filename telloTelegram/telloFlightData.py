@@ -47,7 +47,7 @@ class FlightData():
         self.height = int.from_bytes(data[0:1], "little") #int16(data[0], data[1])
         self.north_speed = int.from_bytes(data[2:3], "little")# int16(data[2], data[3])
         self.east_speed = int.from_bytes(data[4:5], "little") # int16(data[4], data[5])
-        self.ground_speed = int.from_bytes(data[7:7], "little")# int16(data[6], data[7])
+        self.ground_speed = int.from_bytes(data[6:7], "little")# int16(data[6], data[7])
         self.fly_time = int.from_bytes(data[8:9], "little") #int16(data[8], data[9])
 
         self.imu_state = ((data[10] >> 0) & 0x1)
