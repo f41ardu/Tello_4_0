@@ -32,6 +32,14 @@ class Telegram():
         packet = self.build(104, 85, self.sequence_number, [0,])
         return packet, packet.hex()
     
+    def activationTime(self):
+        self.sequence_number = self.sequence_number + 1
+        # build time 
+        tdata = self._giveTime()
+        # build and return package
+        packet = self.build(96, 71, self.sequence_number, tdata)
+        return packet, packet.hex()
+    
     def stick(self, fast, roll, pitch, thr, yaw):
         self.sequence_number = self.sequence_number + 1
         fast  = self._map(fast, -1000, 1000, 364, 1684)
@@ -75,6 +83,17 @@ class Telegram():
                  now.microsecond & 0xff, now.microsecond >> 16]
         self.sequence_number = 0
         return
+    
+    def _giveTime(self):
+        now = datetime.datetime.now()
+        timer = [0x00, now.year & 0xff, now.year >> 16,
+                           now.month & 0xff, now.month >> 16,
+                           now.day & 0xff, now.day >> 16,
+                           now.hour & 0xff, now.hour >> 16,
+                           now.minute & 0xff, now.minute >> 16,
+                           now.second & 0xff, now.second >> 16,
+                           now.microsecond & 0xff, now.microsecond >> 16]
+        return timer 
 
     def _map(self ,x, in_min, in_max, out_min,  out_max):
         '''
