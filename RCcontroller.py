@@ -140,6 +140,8 @@ def byte_to_hexstring(buf):
  
 # udp handle 
 myTello = myUDP()
+#tellofFile = myUDP('0.0.0.0',6038,2048)
+
 # telegram object
 telegram = Telegram()
 # flightdata object
@@ -171,6 +173,13 @@ if not 'conn_ack' in conn:
     conn = bb.decode("latin-1",errors="ignore")
 else:
     conntected = True
+
+# set activation time
+telegramData, telegramDatahex = telegram.activationTime()
+print("activationtime: ", telegramData)
+get = myTello.udp_send(telegramData,tellohost,telloport)
+print("AAAA Time: ",get)
+
 
 getBack=myTello.udp_get()
 cmd = int.from_bytes(getBack[5:6], "little")
@@ -219,22 +228,27 @@ while done==False:
     
     getBack=myTello.udp_get()
     cmd = int.from_bytes(getBack[5:6], "little")
+    #print(getBack[5:6], "little",cmd)
     #cmd = (getBack[5] & 0xff) | ((getBack[6] & 0xff) << 8)
-    #if cmd == WIFI_MSG:
-    #    print('Recived WIFI Message: ',getBack)
-    #    print("recv: wifi: %s" % byte_to_hexstring(getBack[9:]))
-    #if cmd == LOW_BAT_THRESHOLD_MSG:
-    #    print("recv: low battery threshold: %s" % byte_to_hexstring(getBack[9:-2]))
-    #if cmd == FLIGHT_MSG:
-    #    flight_data = flightdata.getData(getBack[9:])
-    #    print(flight_data)
-    if cmd == LOG_HEADER_MSG:
+    if cmd == WIFI_MSG:
+        print('Recived WIFI Message: ',getBack)
+        print("recv: wifi: %s" % byte_to_hexstring(getBack[9:]))
+    if cmd == LOW_BAT_THRESHOLD_MSG:
+        print("recv: low battery threshold: %s" % byte_to_hexstring(getBack[9:-2]))
+    if cmd == FLIGHT_MSG:
+        flight_data = flightdata.getData(getBack[9:])
+        print(flight_data)
+    getBack1 = []  
+    #getBack1=tellofFile.udp_get()
+    print(getBack1)
+    cmd1 = int.from_bytes(getBack1[5:6], "little")
+    if cmd1 == int(LOG_HEADER_MSG):
         flight_data = flightdata.getData(getBack[9:])
         print("log_header:",flight_data)
-    if cmd == LOG_DATA_MSG:
+    if cmd1 == int(LOG_DATA_MSG):
         flight_data = flightdata.getData(getBack[9:])
         print("log_data:",flight_data)   
-    if cmd == LOG_CONFIG_MSG:
+    if cmd1 == int(LOG_CONFIG_MSG):
         flight_data = flightdata.getData(getBack[9:])
         print("log_config:",flight_data)   
     
@@ -323,7 +337,7 @@ while done==False:
 # on exit if running from IDLE.
 
 pygame.quit ()
-myTello.udp_close()
+myUDP.udp_close()
 print ('quit ...')
 
 
